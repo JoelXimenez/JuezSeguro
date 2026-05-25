@@ -1,8 +1,105 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Panel Principal";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-4">
+
+    <!-- Encabezado de bienvenida -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 bg-dark text-white rounded shadow-sm">
+                <h1 class="display-5 mb-1">
+                    <i class="bi bi-shield-lock-fill"></i> Juez Seguro
+                </h1>
+                <p class="mb-0 fs-5">
+                    Bienvenido(a), <strong>@User.Identity?.Name</strong>
+                </p>
+                <small class="text-light opacity-75">
+                    Sistema de emisión segura y anónima de fallos judiciales
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de acceso rápido -->
+    <div class="row g-4">
+
+        <!-- CRUD de Expedientes -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="display-3 text-primary mb-2">
+                        <i class="bi bi-folder2-open"></i>
+                    </div>
+                    <h5 class="card-title">Expedientes</h5>
+                    <p class="card-text text-muted">
+                        Crear, consultar, actualizar y archivar expedientes judiciales.
+                    </p>
+                    <a asp-controller="Expedientes" asp-action="Index"
+                       class="btn btn-primary w-100">
+                        Gestionar expedientes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Crear nuevo expediente (acceso rápido) -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="display-3 text-success mb-2">
+                        <i class="bi bi-file-earmark-plus"></i>
+                    </div>
+                    <h5 class="card-title">Nuevo expediente</h5>
+                    <p class="card-text text-muted">
+                        Registrar un nuevo caso en el sistema.
+                    </p>
+                    <a asp-controller="Expedientes" asp-action="Create"
+                       class="btn btn-success w-100">
+                        Crear expediente
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="display-3 text-info mb-2">
+                        <i class="bi bi-chat-dots-fill"></i>
+                    </div>
+                    <h5 class="card-title">Chat seguro</h5>
+                    <p class="card-text text-muted">
+                        Comunicación en tiempo real entre miembros del sistema.
+                    </p>
+                    <a asp-controller="Chat" asp-action="Index"
+                       class="btn btn-info text-white w-100">
+                        Abrir chat
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Información de sesión / seguridad -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-light border d-flex align-items-center" role="alert">
+                <i class="bi bi-info-circle-fill text-primary me-2 fs-4"></i>
+                <div>
+                    <strong>Sesión activa:</strong> @User.Identity?.Name
+                    &middot; <span class="text-muted">Autenticación segura con cifrado PBKDF2</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+@section Scripts {
+    <!-- Bootstrap Icons (CDN) -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+}
