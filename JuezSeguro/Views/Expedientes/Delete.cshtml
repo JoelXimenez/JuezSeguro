@@ -1,0 +1,38 @@
+@model JuezSeguro.Models.Expediente
+
+@{
+    ViewData["Title"] = "Eliminar Expediente";
+}
+
+<h1>Eliminar Expediente</h1>
+
+<div class="alert alert-danger">
+    <strong>¿Está seguro que desea eliminar este expediente?</strong> Esta acción lo marcará como inactivo.
+</div>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.NumeroExpediente)</dt>
+            <dd class="col-sm-9">@Model.NumeroExpediente</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Titulo)</dt>
+            <dd class="col-sm-9">@Model.Titulo</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Materia)</dt>
+            <dd class="col-sm-9">@Model.Materia</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Estado)</dt>
+            <dd class="col-sm-9">@Model.Estado</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.FechaApertura)</dt>
+            <dd class="col-sm-9">@Model.FechaApertura.ToString("dd/MM/yyyy")</dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Confirmar eliminación</button>
+    <a asp-action="Index" class="btn btn-secondary ms-1">Cancelar</a>
+</form>

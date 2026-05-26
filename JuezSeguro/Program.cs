@@ -40,6 +40,15 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;           
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("SoloAdmin",       p => p.RequireRole("Administrador"));
+    options.AddPolicy("SoloJuez",        p => p.RequireRole("Juez"));
+    options.AddPolicy("SoloAuditor",     p => p.RequireRole("Auditor"));
+    options.AddPolicy("JuezOAdmin",      p => p.RequireRole("Juez", "Administrador"));
+    options.AddPolicy("UsuarioInterno",  p => p.RequireRole("Juez", "Auditor", "Administrador", "OperadorTecnico"));
+});
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
@@ -49,6 +58,54 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+
+    // Aplicar migraciones pendientes antes de usar RoleManager/Identity.
+    // Evitar intentar crear tablas que ya existen (por ejemplo si la BD fue restaurada
+    // o las tablas fueron creadas manualmente) para prevenir errores como
+    // "There is already an object named 'AspNetUsers' in the database".
+    var db = services.GetRequiredService<ApplicationDbContext>();
+    try
+    {
+        if (await db.Database.CanConnectAsync())
+        {
+            var conn = db.Database.GetDbConnection();
+            try
+            {
+                await conn.OpenAsync();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'AspNetUsers'";
+                var scalar = await cmd.ExecuteScalarAsync();
+                var exists = Convert.ToInt32(scalar) > 0;
+                if (!exists)
+                {
+                    await db.Database.MigrateAsync();
+                }
+                else
+                {
+                    // Las tablas de Identity ya existen; omitimos MigrateAsync.
+                }
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+        else
+        {
+            // Si no puede conectar, intentar ejecutar MigrateAsync para que EF intente crear la BD
+            await db.Database.MigrateAsync();
+        }
+    }
+    catch (Microsoft.Data.SqlClient.SqlException ex)
+    {
+        // Si hay un error de creación por objeto ya existente, lo registramos y continuamos.
+        // Esto evita que la aplicación falle en entornos donde la BD fue preparada manualmente.
+        Console.WriteLine($"SQL error applying migrations: {ex.Message}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error applying migrations: {ex.Message}");
+    }
 
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     string[] roles = { "Juez", "Auditor", "Administrador", "OperadorTecnico" };
@@ -108,5 +165,7 @@ app.MapControllerRoute(
 
 app.MapRazorPages()
    .WithStaticAssets();
+
+app.MapHub<JuezSeguro.Hubs.ChatHub>("/chathub");
 
 app.Run();
