@@ -1,105 +1,96 @@
-﻿@{
+@{
     ViewData["Title"] = "Panel Principal";
 }
 
-<div class="container mt-4">
+<!-- Hero de bienvenida -->
+<div class="js-hero mb-4">
+    <div class="d-flex align-items-start align-items-md-center flex-column flex-md-row gap-3">
+        <div class="flex-grow-1">
+            <h1 class="h3 mb-1 fw-bold">
+                <i class="bi bi-shield-lock-fill hero-icon me-2"></i>Juez Seguro
+            </h1>
+            <p class="mb-1 fs-6">
+                Bienvenida / Bienvenido, <strong>@User.Identity?.Name</strong>
+            </p>
+            <small class="hero-sub">Sistema de emisión segura y anónima de fallos judiciales</small>
+        </div>
+        <div class="text-md-end">
+            <span class="badge rounded-pill px-3 py-2"
+                  style="background:rgba(184,150,46,.25);color:var(--js-gold-light);font-size:.78rem;border:1px solid rgba(184,150,46,.35)">
+                <i class="bi bi-shield-check me-1"></i>Sesión activa
+            </span>
+        </div>
+    </div>
+</div>
 
-    <!-- Encabezado de bienvenida -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="p-4 bg-dark text-white rounded shadow-sm">
-                <h1 class="display-5 mb-1">
-                    <i class="bi bi-shield-lock-fill"></i> Juez Seguro
-                </h1>
-                <p class="mb-0 fs-5">
-                    Bienvenido(a), <strong>@User.Identity?.Name</strong>
+<!-- Tarjetas de acceso rápido -->
+<div class="row g-4 mb-4">
+
+    <div class="col-sm-6 col-lg-4">
+        <div class="js-quick-card">
+            <div class="card-body p-4 text-center">
+                <div class="card-icon icon-primary">
+                    <i class="bi bi-folder2-open"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Expedientes</h5>
+                <p class="text-muted small mb-3">
+                    Consultar, crear, actualizar y archivar expedientes judiciales del sistema.
                 </p>
-                <small class="text-light opacity-75">
-                    Sistema de emisión segura y anónima de fallos judiciales
-                </small>
+                <a asp-controller="Expedientes" asp-action="Index"
+                   class="btn btn-primary w-100">
+                    <i class="bi bi-folder2-open me-1"></i>Gestionar expedientes
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Tarjetas de acceso rápido -->
-    <div class="row g-4">
-
-        <!-- CRUD de Expedientes -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center">
-                    <div class="display-3 text-primary mb-2">
-                        <i class="bi bi-folder2-open"></i>
-                    </div>
-                    <h5 class="card-title">Expedientes</h5>
-                    <p class="card-text text-muted">
-                        Crear, consultar, actualizar y archivar expedientes judiciales.
-                    </p>
-                    <a asp-controller="Expedientes" asp-action="Index"
-                       class="btn btn-primary w-100">
-                        Gestionar expedientes
-                    </a>
+    <div class="col-sm-6 col-lg-4">
+        <div class="js-quick-card">
+            <div class="card-body p-4 text-center">
+                <div class="card-icon icon-success">
+                    <i class="bi bi-file-earmark-plus"></i>
                 </div>
+                <h5 class="fw-bold mb-2">Nuevo expediente</h5>
+                <p class="text-muted small mb-3">
+                    Registrar un nuevo caso judicial en el sistema de forma segura.
+                </p>
+                <a asp-controller="Expedientes" asp-action="Create"
+                   class="btn btn-success w-100">
+                    <i class="bi bi-plus-circle me-1"></i>Crear expediente
+                </a>
             </div>
         </div>
-
-        <!-- Crear nuevo expediente (acceso rápido) -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center">
-                    <div class="display-3 text-success mb-2">
-                        <i class="bi bi-file-earmark-plus"></i>
-                    </div>
-                    <h5 class="card-title">Nuevo expediente</h5>
-                    <p class="card-text text-muted">
-                        Registrar un nuevo caso en el sistema.
-                    </p>
-                    <a asp-controller="Expedientes" asp-action="Create"
-                       class="btn btn-success w-100">
-                        Crear expediente
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chat -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center">
-                    <div class="display-3 text-info mb-2">
-                        <i class="bi bi-chat-dots-fill"></i>
-                    </div>
-                    <h5 class="card-title">Chat seguro</h5>
-                    <p class="card-text text-muted">
-                        Comunicación en tiempo real entre miembros del sistema.
-                    </p>
-                    <a asp-controller="Chat" asp-action="Index"
-                       class="btn btn-info text-white w-100">
-                        Abrir chat
-                    </a>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <!-- Información de sesión / seguridad -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="alert alert-light border d-flex align-items-center" role="alert">
-                <i class="bi bi-info-circle-fill text-primary me-2 fs-4"></i>
-                <div>
-                    <strong>Sesión activa:</strong> @User.Identity?.Name
-                    &middot; <span class="text-muted">Autenticación segura con cifrado PBKDF2</span>
+    <div class="col-sm-6 col-lg-4">
+        <div class="js-quick-card">
+            <div class="card-body p-4 text-center">
+                <div class="card-icon icon-info">
+                    <i class="bi bi-chat-dots-fill"></i>
                 </div>
+                <h5 class="fw-bold mb-2">Chat seguro</h5>
+                <p class="text-muted small mb-3">
+                    Comunicación en tiempo real y cifrada entre personas integrantes del sistema.
+                </p>
+                <a asp-controller="Chat" asp-action="Index"
+                   class="btn btn-primary w-100">
+                    <i class="bi bi-chat-dots me-1"></i>Abrir chat
+                </a>
             </div>
         </div>
     </div>
 
 </div>
 
-@section Scripts {
-    <!-- Bootstrap Icons (CDN) -->
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-}
+<!-- Barra de sesión -->
+<div class="js-session-bar">
+    <i class="bi bi-person-check-fill fs-5" style="color:var(--js-gold)"></i>
+    <div class="flex-grow-1">
+        <strong>Sesión activa:</strong> @User.Identity?.Name
+        <span class="text-muted ms-2">·</span>
+        <span class="text-muted ms-2 small">Autenticación segura con cifrado PBKDF2</span>
+    </div>
+    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle small">
+        <i class="bi bi-lock-fill me-1"></i>Cifrado activo
+    </span>
+</div>

@@ -3,84 +3,84 @@
     var sala = ViewBag.Sala as string ?? "general";
 }
 
-<div class="container-fluid py-3">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
+<div class="js-chat-wrapper">
 
-            <!-- Encabezado -->
-            <div class="d-flex align-items-center mb-3 gap-2">
-                <span class="fs-4">💬</span>
-                <div>
-                    <h4 class="mb-0">Chat Interno</h4>
-                    <small class="text-muted">
-                        Sala: <strong class="text-capitalize">@sala</strong>
-                        &nbsp;·&nbsp;
-                        Conectado como: <strong>@User.Identity!.Name</strong>
-                    </small>
-                </div>
-                <!-- Indicador de conexión -->
-                <span id="estadoConexion"
-                      class="ms-auto badge bg-secondary"
-                      title="Estado de conexión">
-                    ⏳ Conectando…
-                </span>
+    <!-- Encabezado del chat -->
+    <div class="js-chat-header">
+        <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+             style="width:36px;height:36px;background:rgba(184,150,46,.2);border:1px solid rgba(184,150,46,.4)">
+            <i class="bi bi-chat-dots-fill" style="color:var(--js-gold-light)"></i>
+        </div>
+        <div class="flex-grow-1">
+            <div class="chat-sala">
+                <span class="text-capitalize">@sala</span>
             </div>
+            <div class="chat-meta">
+                Sala segura · Sesión de <strong style="color:rgba(255,255,255,.88)">@User.Identity!.Name</strong>
+            </div>
+        </div>
+        <span id="estadoConexion"
+              class="badge-conexion badge bg-secondary"
+              title="Estado de la conexión">
+            ⏳ Conectando…
+        </span>
+    </div>
 
-            <!-- Área de mensajes -->
-            <div id="mensajes"
-                 class="border rounded p-3 mb-3 bg-light"
-                 style="height: 420px; overflow-y: auto; scroll-behavior: smooth;">
-                <div class="text-center text-muted small py-4" id="cargandoHistorial">
-                    Cargando historial…
-                </div>
-            </div>
-
-            <!-- Input de mensaje -->
-            <div class="input-group">
-                <input id="mensajeInput"
-                       type="text"
-                       class="form-control"
-                       placeholder="Escribe un mensaje…"
-                       maxlength="1000"
-                       autocomplete="off"
-                       disabled />
-                <button id="enviarBtn"
-                        class="btn btn-primary"
-                        type="button"
-                        disabled>
-                    Enviar
-                </button>
-            </div>
-            <div class="d-flex justify-content-between mt-1">
-                <small class="text-muted">Máx. 1 000 caracteres</small>
-                <small id="contadorChars" class="text-muted">0 / 1000</small>
-            </div>
-
+    <!-- Área de mensajes -->
+    <div id="mensajes" class="js-chat-messages">
+        <div id="cargandoHistorial"
+             class="d-flex flex-column align-items-center justify-content-center h-100 text-muted gap-2"
+             style="opacity:.6">
+            <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+            <small>Cargando historial de mensajes…</small>
         </div>
     </div>
+
+    <!-- Input de mensaje -->
+    <div class="js-chat-input-area">
+        <div class="input-group">
+            <input id="mensajeInput"
+                   type="text"
+                   class="form-control"
+                   placeholder="Escriba un mensaje…"
+                   maxlength="1000"
+                   autocomplete="off"
+                   aria-label="Escribir mensaje"
+                   disabled />
+            <button id="enviarBtn"
+                    class="btn btn-primary"
+                    type="button"
+                    aria-label="Enviar mensaje"
+                    disabled>
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+        <div class="d-flex justify-content-between mt-1 px-1">
+            <small class="text-muted" style="font-size:.72rem">
+                <i class="bi bi-lock-fill me-1" style="color:var(--js-gold)"></i>Canal cifrado · Máx. 1 000 caracteres
+            </small>
+            <small id="contadorChars" class="text-muted" style="font-size:.72rem">0 / 1000</small>
+        </div>
+    </div>
+
 </div>
 
 @section Scripts {
-    @* Opción 1 (recomendada): paquete local instalado con libman / npm *@
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
-
-    @* Opción 2 – fallback CDN sin atributo integrity (evita el bloqueo SRI):
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
-*@
 
     <script>
         (function () {
             "use strict";
 
-            const sala        = "@sala";
+            const sala          = "@sala";
             const usuarioActual = "@User.Identity!.Name";
 
-            const divMensajes  = document.getElementById("mensajes");
-            const input        = document.getElementById("mensajeInput");
-            const btnEnviar    = document.getElementById("enviarBtn");
-            const estadoBadge  = document.getElementById("estadoConexion");
-            const contador     = document.getElementById("contadorChars");
-            const divCargando  = document.getElementById("cargandoHistorial");
+            const divMensajes = document.getElementById("mensajes");
+            const input       = document.getElementById("mensajeInput");
+            const btnEnviar   = document.getElementById("enviarBtn");
+            const estadoBadge = document.getElementById("estadoConexion");
+            const contador    = document.getElementById("contadorChars");
+            const divCargando = document.getElementById("cargandoHistorial");
 
             let historialListo = false;
 
@@ -93,7 +93,6 @@
 
             // ── Recibir mensajes (historial + nuevos) ─────────────────────────────────
             connection.on("RecibirMensaje", (usuario, mensaje, hora) => {
-                // Quitar el aviso de carga la primera vez que llega un mensaje
                 if (!historialListo) {
                     historialListo = true;
                     divCargando?.remove();
@@ -122,7 +121,6 @@
                 .then(() => {
                     setEstado("success", "✅ Conectado");
                     setInputHabilitado(true);
-                    // Si no llegó historial en 1.5 s, quitar el aviso de carga
                     setTimeout(() => {
                         if (!historialListo) divCargando?.remove();
                     }, 1500);
@@ -130,7 +128,8 @@
                 .catch(err => {
                     console.error("Error al conectar al hub:", err);
                     setEstado("danger", "❌ Sin conexión");
-                    divCargando && (divCargando.textContent = "No se pudo cargar el historial.");
+                    if (divCargando) divCargando.innerHTML =
+                        '<i class="bi bi-wifi-off fs-4 mb-1"></i><small>No se pudo cargar el historial.</small>';
                 });
 
             // ── Enviar mensaje ────────────────────────────────────────────────────────
@@ -143,6 +142,7 @@
 
                 input.value = "";
                 contador.textContent = "0 / 1000";
+                contador.className = "text-muted";
             }
 
             btnEnviar.addEventListener("click", enviar);
@@ -159,43 +159,47 @@
             function agregarMensaje(usuario, mensaje, hora) {
                 const esPropio = usuario === usuarioActual;
 
-                const wrapper = document.createElement("div");
-                wrapper.className = `d-flex mb-2 ${esPropio ? "justify-content-end" : "justify-content-start"}`;
+                const wrap = document.createElement("div");
+                wrap.className = `chat-bubble-wrap ${esPropio ? "own" : "other"}`;
+
+                if (!esPropio) {
+                    const avatar = document.createElement("div");
+                    avatar.className = "chat-avatar";
+                    avatar.textContent = usuario.charAt(0).toUpperCase();
+                    wrap.appendChild(avatar);
+                }
 
                 const burbuja = document.createElement("div");
-                burbuja.className = `p-2 rounded-3 text-break shadow-sm ${esPropio
-                    ? "bg-primary text-white"
-                    : "bg-white border"}`;
-                burbuja.style.maxWidth = "75%";
+                burbuja.className = `chat-bubble ${esPropio ? "own" : "other"}`;
 
                 if (!esPropio) {
                     const nombre = document.createElement("div");
-                    nombre.className = "fw-semibold small mb-1";
+                    nombre.className = "bubble-sender";
                     nombre.textContent = usuario;
                     burbuja.appendChild(nombre);
                 }
 
-                const texto = document.createElement("div");
-                texto.textContent = mensaje;  // textContent previene XSS
-                burbuja.appendChild(texto);
+                const textoEl = document.createElement("div");
+                textoEl.textContent = mensaje;   // textContent previene XSS
+                burbuja.appendChild(textoEl);
 
-                const horaEl = document.createElement("div");
-                horaEl.className = `text-end mt-1 ${esPropio ? "text-white-50" : "text-muted"} small`;
+                const horaEl = document.createElement("span");
+                horaEl.className = "bubble-time";
                 horaEl.textContent = hora;
                 burbuja.appendChild(horaEl);
 
-                wrapper.appendChild(burbuja);
-                divMensajes.appendChild(wrapper);
+                wrap.appendChild(burbuja);
+                divMensajes.appendChild(wrap);
                 divMensajes.scrollTop = divMensajes.scrollHeight;
             }
 
             function setEstado(tipo, texto) {
-                estadoBadge.className = `ms-auto badge bg-${tipo}`;
+                estadoBadge.className = `badge-conexion badge bg-${tipo}`;
                 estadoBadge.textContent = texto;
             }
 
             function setInputHabilitado(habilitado) {
-                input.disabled   = !habilitado;
+                input.disabled    = !habilitado;
                 btnEnviar.disabled = !habilitado;
                 if (habilitado) input.focus();
             }

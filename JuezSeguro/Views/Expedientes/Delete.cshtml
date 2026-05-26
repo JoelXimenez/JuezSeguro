@@ -4,35 +4,72 @@
     ViewData["Title"] = "Eliminar Expediente";
 }
 
-<h1>Eliminar Expediente</h1>
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="js-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index"><i class="bi bi-house-door me-1"></i>Inicio</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Expedientes</a></li>
+        <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.Id">@Model.NumeroExpediente</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Eliminar</li>
+    </ol>
+</nav>
 
-<div class="alert alert-danger">
-    <strong>¿Está seguro que desea eliminar este expediente?</strong> Esta acción lo marcará como inactivo.
-</div>
+<div class="row">
+    <div class="col-xl-7 col-lg-9">
 
-<div class="card shadow-sm mb-3">
-    <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.NumeroExpediente)</dt>
-            <dd class="col-sm-9">@Model.NumeroExpediente</dd>
+        <!-- Aviso de advertencia -->
+        <div class="alert d-flex align-items-start gap-3 mb-4 border-0 rounded-3 p-4"
+             style="background:#fff3cd;border-left:4px solid #f0a500 !important;border-left-style:solid !important"
+             role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-4 flex-shrink-0 mt-1" style="color:#d68910"></i>
+            <div>
+                <strong class="d-block mb-1" style="color:#7d4e00">Confirmación requerida</strong>
+                <span style="color:#6b4400">
+                    Esta acción marcará el expediente como inactivo en el sistema.
+                    La operación quedará registrada en el historial de auditoría.
+                </span>
+            </div>
+        </div>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Titulo)</dt>
-            <dd class="col-sm-9">@Model.Titulo</dd>
+        <!-- Resumen del expediente -->
+        <div class="js-delete-zone mb-4">
+            <h6 class="fw-bold text-danger mb-3">
+                <i class="bi bi-folder-x me-2"></i>Expediente a eliminar
+            </h6>
+            <dl class="row js-detail-grid g-2 mb-0">
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.MateriaCod)</dt>
-            <dd class="col-sm-9">@Model.MateriaCod</dd>
+                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.NumeroExpediente)</dt>
+                <dd class="col-sm-8">
+                    <code style="font-size:.9rem;color:var(--js-navy-mid)">@Model.NumeroExpediente</code>
+                </dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.EstadoCod)</dt>
-            <dd class="col-sm-9">@Model.EstadoCod</dd>
+                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.Titulo)</dt>
+                <dd class="col-sm-8">@Model.Titulo</dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.FechaApertura)</dt>
-            <dd class="col-sm-9">@Model.FechaApertura.ToString("dd/MM/yyyy")</dd>
-        </dl>
+                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.MateriaCod)</dt>
+                <dd class="col-sm-8">@Model.MateriaCod</dd>
+
+                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.EstadoCod)</dt>
+                <dd class="col-sm-8">@Model.EstadoCod</dd>
+
+                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.FechaApertura)</dt>
+                <dd class="col-sm-8">@Model.FechaApertura.ToString("dd/MM/yyyy")</dd>
+
+            </dl>
+        </div>
+
+        <!-- Acciones de confirmación -->
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-danger px-4">
+                    <i class="bi bi-trash3 me-1"></i>Confirmar eliminación
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                    <i class="bi bi-x-circle me-1"></i>Cancelar
+                </a>
+            </div>
+        </form>
+
     </div>
 </div>
-
-<form asp-action="Delete">
-    <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Confirmar eliminación</button>
-    <a asp-action="Index" class="btn btn-secondary ms-1">Cancelar</a>
-</form>

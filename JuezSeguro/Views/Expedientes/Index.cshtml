@@ -4,52 +4,100 @@
     ViewData["Title"] = "Expedientes";
 }
 
-<h1>Expedientes</h1>
+<!-- Encabezado de sección -->
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+        <nav aria-label="breadcrumb" class="js-breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house-door me-1"></i>Inicio
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Expedientes</li>
+            </ol>
+        </nav>
+        <h1 class="h4 fw-bold mb-0">
+            <i class="bi bi-folder2-open me-2" style="color:var(--js-blue)"></i>Expedientes judiciales
+        </h1>
+    </div>
+    @if (User.IsInRole("Juez") || User.IsInRole("Administrador"))
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Nuevo expediente
+        </a>
+    }
+</div>
 
-@if (User.IsInRole("Juez") || User.IsInRole("Administrador"))
-{
-    <p>
-        <a asp-action="Create" class="btn btn-primary">Nuevo Expediente</a>
-    </p>
-}
-
-<table class="table table-striped table-hover">
-    <thead class="table-dark">
-        <tr>
-            <th>@Html.DisplayNameFor(m => m.NumeroExpediente)</th>
-            <th>@Html.DisplayNameFor(m => m.Titulo)</th>
-            <th>@Html.DisplayNameFor(m => m.MateriaCod)</th>
-            <th>@Html.DisplayNameFor(m => m.EstadoCod)</th>
-            <th>@Html.DisplayNameFor(m => m.FechaApertura)</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<!-- Tabla -->
+<div class="js-table-wrapper">
+    <table class="table js-table">
+        <thead>
             <tr>
-                <td>@item.NumeroExpediente</td>
-                <td>@item.Titulo</td>
-                <td>@item.MateriaCod</td>
-                <td>
-                    <span class="badge @(item.EstadoCod == "ABIERTO" ? "bg-success" :
-                                         item.EstadoCod == "CERRADO" ? "bg-secondary" : "bg-warning text-dark")">
-                        @item.EstadoCod
-                    </span>
-                </td>
-                <td>@item.FechaApertura.ToString("dd/MM/yyyy")</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detalles</a>
-                    @if (User.IsInRole("Juez") || User.IsInRole("Administrador"))
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning ms-1">Editar</a>
-                    }
-                    @if (User.IsInRole("Administrador"))
-                    {
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger ms-1">Eliminar</a>
-                    }
-                </td>
+                <th scope="col"><i class="bi bi-hash me-1 opacity-50"></i>@Html.DisplayNameFor(m => m.NumeroExpediente)</th>
+                <th scope="col"><i class="bi bi-file-text me-1 opacity-50"></i>@Html.DisplayNameFor(m => m.Titulo)</th>
+                <th scope="col"><i class="bi bi-tag me-1 opacity-50"></i>@Html.DisplayNameFor(m => m.MateriaCod)</th>
+                <th scope="col"><i class="bi bi-circle-half me-1 opacity-50"></i>@Html.DisplayNameFor(m => m.EstadoCod)</th>
+                <th scope="col"><i class="bi bi-calendar3 me-1 opacity-50"></i>@Html.DisplayNameFor(m => m.FechaApertura)</th>
+                <th scope="col" class="text-end">Acciones</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <span class="fw-mono fw-semibold" style="font-family:monospace;font-size:.85rem;color:var(--js-navy-mid)">
+                            @item.NumeroExpediente
+                        </span>
+                    </td>
+                    <td>@item.Titulo</td>
+                    <td>
+                        <span class="badge rounded-pill px-3"
+                              style="background:#e8f0fe;color:var(--js-navy-mid);font-size:.75rem;font-weight:600;border:1px solid #c5d3f5">
+                            @item.MateriaCod
+                        </span>
+                    </td>
+                    <td>
+                        @{
+                            var estadoClass = item.EstadoCod switch {
+                                "ABIERTO"    => "badge-abierto",
+                                "CERRADO"    => "badge-cerrado",
+                                "BORRADOR"   => "badge-borrador",
+                                "REVISION"   => "badge-revision",
+                                "PUBLICADO"  => "badge-publicado",
+                                "ARCHIVADO"  => "badge-archivado",
+                                _            => "badge-borrador"
+                            };
+                        }
+                        <span class="badge-estado @estadoClass">@item.EstadoCod</span>
+                    </td>
+                    <td class="text-muted small">@item.FechaApertura.ToString("dd/MM/yyyy")</td>
+                    <td class="text-end">
+                        <a asp-action="Details" asp-route-id="@item.Id"
+                           class="btn btn-sm btn-outline-secondary"
+                           title="Ver detalles">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        @if (User.IsInRole("Juez") || User.IsInRole("Administrador"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.Id"
+                               class="btn btn-sm btn-outline-warning ms-1"
+                               title="Editar expediente">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        }
+                        @if (User.IsInRole("Administrador"))
+                        {
+                            <a asp-action="Delete" asp-route-id="@item.Id"
+                               class="btn btn-sm btn-outline-danger ms-1"
+                               title="Eliminar expediente">
+                                <i class="bi bi-trash3"></i>
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

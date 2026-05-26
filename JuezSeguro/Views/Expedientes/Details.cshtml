@@ -2,47 +2,108 @@
 
 @{
     ViewData["Title"] = "Detalle del Expediente";
+
+    var estadoClass = Model.EstadoCod switch {
+        "ABIERTO"   => "badge-abierto",
+        "CERRADO"   => "badge-cerrado",
+        "BORRADOR"  => "badge-borrador",
+        "REVISION"  => "badge-revision",
+        "PUBLICADO" => "badge-publicado",
+        "ARCHIVADO" => "badge-archivado",
+        _           => "badge-borrador"
+    };
 }
 
-<h1>Detalle del Expediente</h1>
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="js-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index"><i class="bi bi-house-door me-1"></i>Inicio</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Expedientes</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.NumeroExpediente</li>
+    </ol>
+</nav>
 
-<div class="card shadow-sm">
-    <div class="card-header bg-dark text-white">
-        <strong>@Model.NumeroExpediente</strong> — @Model.Titulo
-    </div>
-    <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.NumeroExpediente)</dt>
-            <dd class="col-sm-9">@Model.NumeroExpediente</dd>
+<div class="row">
+    <div class="col-xl-9 col-lg-10">
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Titulo)</dt>
-            <dd class="col-sm-9">@Model.Titulo</dd>
+        <!-- Tarjeta principal -->
+        <div class="js-card mb-3">
+            <div class="js-card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-folder2-open header-accent fs-5"></i>
+                    <span class="fw-bold" style="font-family:monospace;letter-spacing:.05em">
+                        @Model.NumeroExpediente
+                    </span>
+                    <span class="text-white-50 d-none d-sm-inline">—</span>
+                    <span class="text-white-50 d-none d-sm-inline fw-normal" style="font-family:inherit">
+                        @Model.Titulo
+                    </span>
+                </div>
+                <span class="badge-estado @estadoClass">@Model.EstadoCod</span>
+            </div>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Descripcion)</dt>
-            <dd class="col-sm-9">@Model.Descripcion</dd>
+            <div class="card-body p-4">
+                <dl class="row js-detail-grid g-3">
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.MateriaCod)</dt>
-            <dd class="col-sm-9">@Model.MateriaCod</dd>
+                    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.NumeroExpediente)</dt>
+                    <dd class="col-sm-9">
+                        <code style="font-size:.9rem;color:var(--js-navy-mid)">@Model.NumeroExpediente</code>
+                    </dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.EstadoCod)</dt>
-            <dd class="col-sm-9">@Model.EstadoCod</dd>
+                    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Titulo)</dt>
+                    <dd class="col-sm-9">@Model.Titulo</dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.FechaApertura)</dt>
-            <dd class="col-sm-9">@Model.FechaApertura.ToString("dd/MM/yyyy HH:mm")</dd>
+                    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Descripcion)</dt>
+                    <dd class="col-sm-9">
+                        <p class="mb-0" style="white-space:pre-wrap;line-height:1.7">@Model.Descripcion</p>
+                    </dd>
 
-            @if (!string.IsNullOrEmpty(Model.HashIntegridad))
+                    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.MateriaCod)</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge rounded-pill px-3"
+                              style="background:#e8f0fe;color:var(--js-navy-mid);font-size:.8rem;font-weight:600;border:1px solid #c5d3f5">
+                            @Model.MateriaCod
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.EstadoCod)</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge-estado @estadoClass">@Model.EstadoCod</span>
+                    </dd>
+
+                    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.FechaApertura)</dt>
+                    <dd class="col-sm-9">
+                        <i class="bi bi-calendar3 me-1 text-muted"></i>
+                        @Model.FechaApertura.ToString("dd/MM/yyyy HH:mm")
+                    </dd>
+
+                    @if (!string.IsNullOrEmpty(Model.HashIntegridad))
+                    {
+                        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.HashIntegridad)</dt>
+                        <dd class="col-sm-9">
+                            <div class="js-hash-code d-flex align-items-start gap-2">
+                                <i class="bi bi-fingerprint text-muted flex-shrink-0 mt-1"></i>
+                                <span>@Model.HashIntegridad</span>
+                            </div>
+                        </dd>
+                    }
+
+                </dl>
+            </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="d-flex gap-2 flex-wrap">
+            @if (User.IsInRole("Juez") || User.IsInRole("Administrador"))
             {
-                <dt class="col-sm-3">@Html.DisplayNameFor(m => m.HashIntegridad)</dt>
-                <dd class="col-sm-9"><code>@Model.HashIntegridad</code></dd>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-gold">
+                    <i class="bi bi-pencil me-1"></i>Editar expediente
+                </a>
             }
-        </dl>
-    </div>
-</div>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver al listado
+            </a>
+        </div>
 
-<div class="mt-3">
-    @if (User.IsInRole("Juez") || User.IsInRole("Administrador"))
-    {
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
-    }
-    <a asp-action="Index" class="btn btn-secondary ms-1">Volver</a>
+    </div>
 </div>

@@ -4,65 +4,120 @@
     ViewData["Title"] = "Editar Expediente";
 }
 
-<h1>Editar Expediente</h1>
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="js-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index"><i class="bi bi-house-door me-1"></i>Inicio</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Expedientes</a></li>
+        <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.Id">@Model.NumeroExpediente</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Editar</li>
+    </ol>
+</nav>
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <div class="d-flex align-items-center justify-content-center rounded-circle"
+         style="width:42px;height:42px;background:var(--js-gold);flex-shrink:0">
+        <i class="bi bi-pencil text-white"></i>
+    </div>
+    <div>
+        <h1 class="h4 fw-bold mb-0">Editar expediente</h1>
+        <small class="text-muted">Modificando: <strong>@Model.NumeroExpediente</strong> — @Model.Titulo</small>
+    </div>
+</div>
 
 <div class="row">
-    <div class="col-md-8">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+    <div class="col-xl-8 col-lg-10">
+        <div class="js-form-card">
 
-            <div class="mb-3">
-                <label asp-for="NumeroExpediente" class="form-label"></label>
-                <input asp-for="NumeroExpediente" class="form-control" />
-                <span asp-validation-for="NumeroExpediente" class="text-danger"></span>
-            </div>
+            <form asp-action="Edit" novalidate>
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger d-flex align-items-start gap-2 py-2 mb-4"
+                     role="alert">
+                    <i class="bi bi-exclamation-triangle-fill mt-1 flex-shrink-0"></i>
+                    <div></div>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="Titulo" class="form-label"></label>
-                <input asp-for="Titulo" class="form-control" />
-                <span asp-validation-for="Titulo" class="text-danger"></span>
-            </div>
+                <input type="hidden" asp-for="Id" />
 
-            <div class="mb-3">
-                <label asp-for="Descripcion" class="form-label"></label>
-                <textarea asp-for="Descripcion" class="form-control" rows="5"></textarea>
-                <span asp-validation-for="Descripcion" class="text-danger"></span>
-            </div>
+                <!-- Fila 1: Número y Título -->
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-5">
+                        <label asp-for="NumeroExpediente" class="form-label">
+                            <i class="bi bi-hash me-1 text-muted"></i>@Html.DisplayNameFor(m => m.NumeroExpediente)
+                        </label>
+                        <input asp-for="NumeroExpediente" class="form-control" autocomplete="off" />
+                        <span asp-validation-for="NumeroExpediente" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-7">
+                        <label asp-for="Titulo" class="form-label">
+                            <i class="bi bi-file-text me-1 text-muted"></i>@Html.DisplayNameFor(m => m.Titulo)
+                        </label>
+                        <input asp-for="Titulo" class="form-control" />
+                        <span asp-validation-for="Titulo" class="text-danger small"></span>
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="MateriaCod" class="form-label"></label>
-                <select asp-for="MateriaCod" class="form-select">
-                    <option value="">-- Seleccione materia --</option>
-                    <option value="PENAL">Penal</option>
-                    <option value="CIVIL">Civil</option>
-                    <option value="LABORAL">Laboral</option>
-                    <option value="ADMIN">Administrativo</option>
-                    <option value="CONST">Constitucional</option>
-                </select>
-                <span asp-validation-for="MateriaCod" class="text-danger"></span>
-            </div>
+                <!-- Descripción -->
+                <div class="mb-3">
+                    <label asp-for="Descripcion" class="form-label">
+                        <i class="bi bi-card-text me-1 text-muted"></i>@Html.DisplayNameFor(m => m.Descripcion)
+                    </label>
+                    <textarea asp-for="Descripcion" class="form-control" rows="5"></textarea>
+                    <span asp-validation-for="Descripcion" class="text-danger small"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="EstadoCod" class="form-label"></label>
-                <select asp-for="EstadoCod" class="form-select">
-                    <option value="BORRADOR">Borrador</option>
-                    <option value="REVISION">En Revisión</option>
-                    <option value="PUBLICADO">Publicado</option>
-                    <option value="ARCHIVADO">Archivado</option>
-                </select>
-                <span asp-validation-for="EstadoCod" class="text-danger"></span>
-            </div>
+                <!-- Fila 2: Materia y Estado -->
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label asp-for="MateriaCod" class="form-label">
+                            <i class="bi bi-tag me-1 text-muted"></i>@Html.DisplayNameFor(m => m.MateriaCod)
+                        </label>
+                        <select asp-for="MateriaCod" class="form-select">
+                            <option value="">— Seleccione materia —</option>
+                            <option value="PENAL">Penal</option>
+                            <option value="CIVIL">Civil</option>
+                            <option value="LABORAL">Laboral</option>
+                            <option value="ADMIN">Administrativo</option>
+                            <option value="CONST">Constitucional</option>
+                        </select>
+                        <span asp-validation-for="MateriaCod" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="EstadoCod" class="form-label">
+                            <i class="bi bi-circle-half me-1 text-muted"></i>@Html.DisplayNameFor(m => m.EstadoCod)
+                        </label>
+                        <select asp-for="EstadoCod" class="form-select">
+                            <option value="BORRADOR">Borrador</option>
+                            <option value="REVISION">En revisión</option>
+                            <option value="PUBLICADO">Publicado</option>
+                            <option value="ARCHIVADO">Archivado</option>
+                        </select>
+                        <span asp-validation-for="EstadoCod" class="text-danger small"></span>
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="IdTribunal" class="form-label"></label>
-                <input asp-for="IdTribunal" class="form-control" type="number" />
-                <span asp-validation-for="IdTribunal" class="text-danger"></span>
-            </div>
+                <!-- ID Tribunal -->
+                <div class="mb-4" style="max-width:200px">
+                    <label asp-for="IdTribunal" class="form-label">
+                        <i class="bi bi-building me-1 text-muted"></i>@Html.DisplayNameFor(m => m.IdTribunal)
+                    </label>
+                    <input asp-for="IdTribunal" class="form-control" type="number" min="1" />
+                    <span asp-validation-for="IdTribunal" class="text-danger small"></span>
+                </div>
 
-            <button type="submit" class="btn btn-warning">Guardar cambios</button>
-            <a asp-action="Index" class="btn btn-secondary ms-1">Cancelar</a>
-        </form>
+                <!-- Acciones -->
+                <hr class="my-3" />
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-gold px-4">
+                        <i class="bi bi-check2-circle me-1"></i>Guardar cambios
+                    </button>
+                    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </a>
+                </div>
+
+            </form>
+        </div>
     </div>
 </div>
 
