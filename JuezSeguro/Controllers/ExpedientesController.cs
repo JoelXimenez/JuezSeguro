@@ -22,14 +22,15 @@ namespace JuezSeguro.Controllers
         // GET: Expedientes
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Expedientes.Where(e => e.Activo).ToListAsync());
+            // Solo muestra aquellos expedientes cuyo estado NO sea "ARCHIVADO" (simulando que está activo)
+            return View(await _context.Expedientes.Where(e => e.EstadoCod != "ARCHIVADO").ToListAsync());
         }
 
         // GET: Expedientes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
-            var expediente = await _context.Expedientes.FirstOrDefaultAsync(m => m.Id == id && m.Activo);
+            var expediente = await _context.Expedientes.FirstOrDefaultAsync(m => m.Id == id && m.EstadoCod != "ARCHIVADO");
             if (expediente == null) return NotFound();
             return View(expediente);
         }
@@ -45,11 +46,16 @@ namespace JuezSeguro.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "JuezOAdmin")]
-        public async Task<IActionResult> Create([Bind("NumeroExpediente,Titulo,Descripcion,Materia,Estado")] Expediente expediente)
+        public async Task<IActionResult> Create([Bind("NumeroExpediente,Titulo,Descripcion,MateriaCod,EstadoCod,IdTribunal")] Expediente expediente)
         {
+            // Omitimos validación del campo que llenaremos del lado del servidor
+            ModelState.Remove("CreadoPorId");
+            ModelState.Remove("PseudonimoCreador");
+
             if (ModelState.IsValid)
             {
                 expediente.CreadoPorId = _userManager.GetUserId(User)!;
+                expediente.PseudonimoCreador = User.Identity?.Name ?? "Anónimo";
                 expediente.FechaApertura = DateTime.UtcNow;
                 _context.Add(expediente);
                 await _context.SaveChangesAsync();
@@ -72,17 +78,33 @@ namespace JuezSeguro.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "JuezOAdmin")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,NumeroExpediente,Titulo,Descripcion,Materia,Estado,FechaApertura,FechaCierre,HashIntegridad,FirmaDigital,CreadoPorId,Activo")] Expediente expediente)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,NumeroExpediente,Titulo,Descripcion,MateriaCod,EstadoCod,IdTribunal")] Expediente expediente)
         {
             if (id != expediente.Id) return NotFound();
+
+            // Ignorar validación de campos requeridos que no se actualizan desde este formulario
+            ModelState.Remove("CreadoPorId");
+            ModelState.Remove("PseudonimoCreador");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    expediente.ModificadoPorId = _userManager.GetUserId(User);
-                    expediente.FechaModificacion = DateTime.UtcNow;
-                    _context.Update(expediente);
+                    // Buscar el registro original en la base de datos
+                    var expedienteDb = await _context.Expedientes.FindAsync(id);
+                    if (expedienteDb == null) return NotFound();
+
+                    // Actualizar sólo los campos permitidos
+                    expedienteDb.NumeroExpediente = expediente.NumeroExpediente;
+                    expedienteDb.Titulo = expediente.Titulo;
+                    expedienteDb.Descripcion = expediente.Descripcion;
+                    expedienteDb.MateriaCod = expediente.MateriaCod;
+                    expedienteDb.EstadoCod = expediente.EstadoCod;
+                    expedienteDb.IdTribunal = expediente.IdTribunal;
+
+                    expedienteDb.FechaModificacion = DateTime.UtcNow;
+
+                    _context.Update(expedienteDb);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -101,7 +123,7 @@ namespace JuezSeguro.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
-            var expediente = await _context.Expedientes.FirstOrDefaultAsync(m => m.Id == id && m.Activo);
+            var expediente = await _context.Expedientes.FirstOrDefaultAsync(m => m.Id == id && m.EstadoCod != "ARCHIVADO");
             if (expediente == null) return NotFound();
             return View(expediente);
         }
@@ -115,7 +137,7 @@ namespace JuezSeguro.Controllers
             var expediente = await _context.Expedientes.FindAsync(id);
             if (expediente != null)
             {
-                expediente.Activo = false;
+                expediente.EstadoCod = "ARCHIVADO"; // "Activo = false" fue reemplazado por ESTADO_COD = ARCHIVADO
                 _context.Update(expediente);
                 await _context.SaveChangesAsync();
             }

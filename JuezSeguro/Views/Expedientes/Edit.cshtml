@@ -11,8 +11,6 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="CreadoPorId" />
-            <input type="hidden" asp-for="FechaApertura" />
 
             <div class="mb-3">
                 <label asp-for="NumeroExpediente" class="form-label"></label>
@@ -33,25 +31,33 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="Materia" class="form-label"></label>
-                <select asp-for="Materia" asp-items="Html.GetEnumSelectList<JuezSeguro.Models.MateriaJuridica>()" class="form-select"></select>
-                <span asp-validation-for="Materia" class="text-danger"></span>
+                <label asp-for="MateriaCod" class="form-label"></label>
+                <select asp-for="MateriaCod" class="form-select">
+                    <option value="">-- Seleccione materia --</option>
+                    <option value="PENAL">Penal</option>
+                    <option value="CIVIL">Civil</option>
+                    <option value="LABORAL">Laboral</option>
+                    <option value="ADMIN">Administrativo</option>
+                    <option value="CONST">Constitucional</option>
+                </select>
+                <span asp-validation-for="MateriaCod" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Estado" class="form-label"></label>
-                <select asp-for="Estado" asp-items="Html.GetEnumSelectList<JuezSeguro.Models.EstadoExpediente>()" class="form-select"></select>
-                <span asp-validation-for="Estado" class="text-danger"></span>
+                <label asp-for="EstadoCod" class="form-label"></label>
+                <select asp-for="EstadoCod" class="form-select">
+                    <option value="BORRADOR">Borrador</option>
+                    <option value="REVISION">En Revisión</option>
+                    <option value="PUBLICADO">Publicado</option>
+                    <option value="ARCHIVADO">Archivado</option>
+                </select>
+                <span asp-validation-for="EstadoCod" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="FechaCierre" class="form-label"></label>
-                <input asp-for="FechaCierre" class="form-control" type="datetime-local" />
-            </div>
-
-            <div class="mb-3 form-check">
-                <input asp-for="Activo" class="form-check-input" type="checkbox" />
-                <label asp-for="Activo" class="form-check-label"></label>
+                <label asp-for="IdTribunal" class="form-label"></label>
+                <input asp-for="IdTribunal" class="form-control" type="number" />
+                <span asp-validation-for="IdTribunal" class="text-danger"></span>
             </div>
 
             <button type="submit" class="btn btn-warning">Guardar cambios</button>

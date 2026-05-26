@@ -18,8 +18,8 @@
         <tr>
             <th>@Html.DisplayNameFor(m => m.NumeroExpediente)</th>
             <th>@Html.DisplayNameFor(m => m.Titulo)</th>
-            <th>@Html.DisplayNameFor(m => m.Materia)</th>
-            <th>@Html.DisplayNameFor(m => m.Estado)</th>
+            <th>@Html.DisplayNameFor(m => m.MateriaCod)</th>
+            <th>@Html.DisplayNameFor(m => m.EstadoCod)</th>
             <th>@Html.DisplayNameFor(m => m.FechaApertura)</th>
             <th></th>
         </tr>
@@ -30,11 +30,11 @@
             <tr>
                 <td>@item.NumeroExpediente</td>
                 <td>@item.Titulo</td>
-                <td>@item.Materia</td>
+                <td>@item.MateriaCod</td>
                 <td>
-                    <span class="badge @(item.Estado == JuezSeguro.Models.EstadoExpediente.Abierto ? "bg-success" :
-                                         item.Estado == JuezSeguro.Models.EstadoExpediente.Cerrado ? "bg-secondary" : "bg-warning text-dark")">
-                        @item.Estado
+                    <span class="badge @(item.EstadoCod == "ABIERTO" ? "bg-success" :
+                                         item.EstadoCod == "CERRADO" ? "bg-secondary" : "bg-warning text-dark")">
+                        @item.EstadoCod
                     </span>
                 </td>
                 <td>@item.FechaApertura.ToString("dd/MM/yyyy")</td>

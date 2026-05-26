@@ -8,5 +8,13 @@ namespace JuezSeguro.Data
     {
         public DbSet<Expediente> Expedientes { get; set; }
         public DbSet<MensajeChat> MensajesChat { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Expediente>().ToTable("TBL_EXPEDIENTE", t => t.ExcludeFromMigrations());
+            builder.Entity<MensajeChat>().ToTable("TBL_MENSAJE_CHAT", t => t.ExcludeFromMigrations());
+        }
     }
 }

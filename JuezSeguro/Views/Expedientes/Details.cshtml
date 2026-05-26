@@ -21,20 +21,14 @@
             <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Descripcion)</dt>
             <dd class="col-sm-9">@Model.Descripcion</dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Materia)</dt>
-            <dd class="col-sm-9">@Model.Materia</dd>
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.MateriaCod)</dt>
+            <dd class="col-sm-9">@Model.MateriaCod</dd>
 
-            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Estado)</dt>
-            <dd class="col-sm-9">@Model.Estado</dd>
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.EstadoCod)</dt>
+            <dd class="col-sm-9">@Model.EstadoCod</dd>
 
             <dt class="col-sm-3">@Html.DisplayNameFor(m => m.FechaApertura)</dt>
             <dd class="col-sm-9">@Model.FechaApertura.ToString("dd/MM/yyyy HH:mm")</dd>
-
-            @if (Model.FechaCierre.HasValue)
-            {
-                <dt class="col-sm-3">@Html.DisplayNameFor(m => m.FechaCierre)</dt>
-                <dd class="col-sm-9">@Model.FechaCierre.Value.ToString("dd/MM/yyyy HH:mm")</dd>
-            }
 
             @if (!string.IsNullOrEmpty(Model.HashIntegridad))
             {
