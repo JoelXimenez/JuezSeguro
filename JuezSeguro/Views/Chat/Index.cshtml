@@ -1,58 +1,205 @@
 @{
     ViewData["Title"] = "Chat Interno";
+    var sala = ViewBag.Sala as string ?? "general";
 }
 
-<h1>Chat Interno</h1>
+<div class="container-fluid py-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
 
-<div class="row">
-    <div class="col-md-8">
-        <div id="mensajes" class="border rounded p-3 mb-3 bg-light" style="height:400px; overflow-y:auto;">
+            <!-- Encabezado -->
+            <div class="d-flex align-items-center mb-3 gap-2">
+                <span class="fs-4">💬</span>
+                <div>
+                    <h4 class="mb-0">Chat Interno</h4>
+                    <small class="text-muted">
+                        Sala: <strong class="text-capitalize">@sala</strong>
+                        &nbsp;·&nbsp;
+                        Conectado como: <strong>@User.Identity!.Name</strong>
+                    </small>
+                </div>
+                <!-- Indicador de conexión -->
+                <span id="estadoConexion"
+                      class="ms-auto badge bg-secondary"
+                      title="Estado de conexión">
+                    ⏳ Conectando…
+                </span>
+            </div>
+
+            <!-- Área de mensajes -->
+            <div id="mensajes"
+                 class="border rounded p-3 mb-3 bg-light"
+                 style="height: 420px; overflow-y: auto; scroll-behavior: smooth;">
+                <div class="text-center text-muted small py-4" id="cargandoHistorial">
+                    Cargando historial…
+                </div>
+            </div>
+
+            <!-- Input de mensaje -->
+            <div class="input-group">
+                <input id="mensajeInput"
+                       type="text"
+                       class="form-control"
+                       placeholder="Escribe un mensaje…"
+                       maxlength="1000"
+                       autocomplete="off"
+                       disabled />
+                <button id="enviarBtn"
+                        class="btn btn-primary"
+                        type="button"
+                        disabled>
+                    Enviar
+                </button>
+            </div>
+            <div class="d-flex justify-content-between mt-1">
+                <small class="text-muted">Máx. 1 000 caracteres</small>
+                <small id="contadorChars" class="text-muted">0 / 1000</small>
+            </div>
+
         </div>
-        <div class="input-group">
-            <input id="mensajeInput" type="text" class="form-control" placeholder="Escribe un mensaje..." maxlength="1000" />
-            <button id="enviarBtn" class="btn btn-primary" type="button">Enviar</button>
-        </div>
-        <small class="text-muted">Conectado como: <strong>@User.Identity!.Name</strong></small>
     </div>
 </div>
 
 @section Scripts {
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"
-        integrity="sha512-bHoKABCqaF6hMjBZUO9NxKBijMrPpf3X5WiTJ17NpKl4pWFINBmOzQ1ZJqT1bwbdB5brfVi2tOe2lJ3QEJrQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script>
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/chathub")
-        .withAutomaticReconnect()
-        .build();
+    @* Opción 1 (recomendada): paquete local instalado con libman / npm *@
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 
-    connection.on("RecibirMensaje", (usuario, mensaje, hora) => {
-        const div = document.getElementById("mensajes");
-        const item = document.createElement("div");
-        item.className = "mb-2";
-        item.innerHTML = `<span class="text-muted">[${hora}]</span> <strong>${escapeHtml(usuario)}:</strong> ${escapeHtml(mensaje)}`;
-        div.appendChild(item);
-        div.scrollTop = div.scrollHeight;
-    });
+    @* Opción 2 – fallback CDN sin atributo integrity (evita el bloqueo SRI):
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+*@
 
-    connection.start().catch(err => console.error(err));
+    <script>
+        (function () {
+            "use strict";
 
-    document.getElementById("enviarBtn").addEventListener("click", enviar);
-    document.getElementById("mensajeInput").addEventListener("keypress", e => {
-        if (e.key === "Enter") enviar();
-    });
+            const sala        = "@sala";
+            const usuarioActual = "@User.Identity!.Name";
 
-    function enviar() {
-        const input = document.getElementById("mensajeInput");
-        const texto = input.value.trim();
-        if (!texto) return;
-        connection.invoke("EnviarMensaje", "@User.Identity!.Name", texto)
-            .catch(err => console.error(err));
-        input.value = "";
-    }
+            const divMensajes  = document.getElementById("mensajes");
+            const input        = document.getElementById("mensajeInput");
+            const btnEnviar    = document.getElementById("enviarBtn");
+            const estadoBadge  = document.getElementById("estadoConexion");
+            const contador     = document.getElementById("contadorChars");
+            const divCargando  = document.getElementById("cargandoHistorial");
 
-    function escapeHtml(str) {
-        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
-</script>
+            let historialListo = false;
+
+            // ── Conexión SignalR ──────────────────────────────────────────────────────
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(`/chathub?sala=${encodeURIComponent(sala)}`)
+                .withAutomaticReconnect([0, 2000, 5000, 10000])
+                .configureLogging(signalR.LogLevel.Warning)
+                .build();
+
+            // ── Recibir mensajes (historial + nuevos) ─────────────────────────────────
+            connection.on("RecibirMensaje", (usuario, mensaje, hora) => {
+                // Quitar el aviso de carga la primera vez que llega un mensaje
+                if (!historialListo) {
+                    historialListo = true;
+                    divCargando?.remove();
+                }
+                agregarMensaje(usuario, mensaje, hora);
+            });
+
+            // ── Eventos de reconexión ─────────────────────────────────────────────────
+            connection.onreconnecting(() => {
+                setEstado("warning", "⏳ Reconectando…");
+                setInputHabilitado(false);
+            });
+
+            connection.onreconnected(() => {
+                setEstado("success", "✅ Conectado");
+                setInputHabilitado(true);
+            });
+
+            connection.onclose(() => {
+                setEstado("danger", "❌ Sin conexión");
+                setInputHabilitado(false);
+            });
+
+            // ── Iniciar conexión ──────────────────────────────────────────────────────
+            connection.start()
+                .then(() => {
+                    setEstado("success", "✅ Conectado");
+                    setInputHabilitado(true);
+                    // Si no llegó historial en 1.5 s, quitar el aviso de carga
+                    setTimeout(() => {
+                        if (!historialListo) divCargando?.remove();
+                    }, 1500);
+                })
+                .catch(err => {
+                    console.error("Error al conectar al hub:", err);
+                    setEstado("danger", "❌ Sin conexión");
+                    divCargando && (divCargando.textContent = "No se pudo cargar el historial.");
+                });
+
+            // ── Enviar mensaje ────────────────────────────────────────────────────────
+            function enviar() {
+                const texto = input.value.trim();
+                if (!texto || connection.state !== signalR.HubConnectionState.Connected) return;
+
+                connection.invoke("EnviarMensaje", texto)
+                    .catch(err => console.error("Error al enviar:", err));
+
+                input.value = "";
+                contador.textContent = "0 / 1000";
+            }
+
+            btnEnviar.addEventListener("click", enviar);
+            input.addEventListener("keypress", e => { if (e.key === "Enter") enviar(); });
+
+            // ── Contador de caracteres ────────────────────────────────────────────────
+            input.addEventListener("input", () => {
+                const len = input.value.length;
+                contador.textContent = `${len} / 1000`;
+                contador.className = len > 900 ? "text-danger" : "text-muted";
+            });
+
+            // ── Helpers ───────────────────────────────────────────────────────────────
+            function agregarMensaje(usuario, mensaje, hora) {
+                const esPropio = usuario === usuarioActual;
+
+                const wrapper = document.createElement("div");
+                wrapper.className = `d-flex mb-2 ${esPropio ? "justify-content-end" : "justify-content-start"}`;
+
+                const burbuja = document.createElement("div");
+                burbuja.className = `p-2 rounded-3 text-break shadow-sm ${esPropio
+                    ? "bg-primary text-white"
+                    : "bg-white border"}`;
+                burbuja.style.maxWidth = "75%";
+
+                if (!esPropio) {
+                    const nombre = document.createElement("div");
+                    nombre.className = "fw-semibold small mb-1";
+                    nombre.textContent = usuario;
+                    burbuja.appendChild(nombre);
+                }
+
+                const texto = document.createElement("div");
+                texto.textContent = mensaje;  // textContent previene XSS
+                burbuja.appendChild(texto);
+
+                const horaEl = document.createElement("div");
+                horaEl.className = `text-end mt-1 ${esPropio ? "text-white-50" : "text-muted"} small`;
+                horaEl.textContent = hora;
+                burbuja.appendChild(horaEl);
+
+                wrapper.appendChild(burbuja);
+                divMensajes.appendChild(wrapper);
+                divMensajes.scrollTop = divMensajes.scrollHeight;
+            }
+
+            function setEstado(tipo, texto) {
+                estadoBadge.className = `ms-auto badge bg-${tipo}`;
+                estadoBadge.textContent = texto;
+            }
+
+            function setInputHabilitado(habilitado) {
+                input.disabled   = !habilitado;
+                btnEnviar.disabled = !habilitado;
+                if (habilitado) input.focus();
+            }
+
+        })();
+    </script>
 }

@@ -1,30 +1,31 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace JuezSeguro.Models  
+namespace JuezSeguro.Models
 {
+    /// <summary>
+    /// Mapea la tabla TBL_MENSAJE_CHAT de BD_JuezSeguro.
+    /// </summary>
     public class MensajeChat
     {
-        public int Id { get; set; }
+        // bigint IDENTITY en la BD → long en C#
+        public long Id { get; set; }
 
         [Required]
         [StringLength(450)]
         public string UsuarioId { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(256)]
-        [Display(Name = "Usuario")]
-        public string NombreUsuario { get; set; } = string.Empty;
+        [StringLength(128)]
+        public string PseudonimoEmisor { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El mensaje no puede estar vacío")]
+        [Required(ErrorMessage = "El mensaje no puede estar vacío.")]
         [StringLength(1000, MinimumLength = 1)]
-        [Display(Name = "Mensaje")]
         public string Texto { get; set; } = string.Empty;
 
-        [DataType(DataType.DateTime)]
-        [Display(Name = "Fecha de envío")]
         public DateTime Fecha { get; set; } = DateTime.UtcNow;
 
-        [Display(Name = "Expediente relacionado")]
-        public int? ExpedienteId { get; set; }
+        [StringLength(50)]
+        public string Sala { get; set; } = "general";
     }
 }
